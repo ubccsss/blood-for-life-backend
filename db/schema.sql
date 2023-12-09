@@ -13,9 +13,16 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    student_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE(email)
+    UNIQUE(email),
+    UNIQUE(student_id)
 );
+
+CREATE INDEX IF NOT EXISTS users_student_id_idx ON users(student_id);
+
+CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
 
 --- Event Attendance
 --- 
