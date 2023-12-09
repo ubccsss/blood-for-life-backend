@@ -2,16 +2,17 @@ package store
 
 import (
 	"context"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
-	ID        int    `db:"id" json:"id"`
-	StudentID string `db:"student_id" json:"studentId"`
-	Name      string `db:"name" json:"name"`
-	Email     string `db:"email" json:"email"`
-	CreatedAt string `db:"created_at" json:"createdAt"`
+	ID        int       `db:"id" json:"id"`
+	StudentID string    `db:"student_id" json:"studentId"`
+	Name      string    `db:"name" json:"name"`
+	Email     string    `db:"email" json:"email"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 }
 
 type UserStore interface {
@@ -41,7 +42,7 @@ func (s *pgUserStore) GetAll(ctx context.Context) ([]User, error) {
 	return u, nil
 }
 
-// Implement the rest of the methods
+// implement all other methods
 func (s *pgUserStore) GetOne(ctx context.Context, id int) (User, error) {
 	return User{}, nil
 }
