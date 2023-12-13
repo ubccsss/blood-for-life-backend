@@ -1,10 +1,10 @@
 package store
-
 import (
 	"context"
-	"time"
-	"strconv"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -18,11 +18,11 @@ type User struct {
 
 type UserStore interface {
 	GetAll(ctx context.Context) ([]User, error)
-	GetOne(ctx context.Context, id int) (User, error)
-	GetOneByStudentID(ctx context.Context, studentID string) (User, error)
-	GetOneByEmail(ctx context.Context, email string) (User, error)
-	Create(ctx context.Context, user User) (User, error)
-	Update(ctx context.Context, user User) (User, error)
+	GetOne(ctx context.Context, id int) (*User, error)
+	GetOneByStudentID(ctx context.Context, studentID string) (*User, error)
+	GetOneByEmail(ctx context.Context, email string) (*User, error)
+	Create(ctx context.Context, user User) (*User, error)
+	Update(ctx context.Context, user User) (*User, error)
 	Delete(ctx context.Context, id int) error
 }
 
@@ -31,67 +31,78 @@ type pgUserStore struct {
 }
 
 func NewPGUserStore(db *sqlx.DB) UserStore {
-	return &pgUserStore{db} 
+	return &pgUserStore{db}
 }
 
 func (s *pgUserStore) GetAll(ctx context.Context) ([]User, error) {
 	var u []User
 	err := s.db.SelectContext(ctx, &u, "SELECT * FROM users")
 	if err != nil {
-		return nil,fmt.Errorf("Unable to retrieve users from database")
+		return nil, fmt.Errorf("Unable to retrieve users from database, error %w", err)
 	}
 	return u, nil
 }
 
 // implement all other methods
-func (s *pgUserStore) GetOne(ctx context.Context, id int) (User, error) {
-	var u User 
-	err := s.db.SelectContext(ctx, &u, "SELECT * FROM users WHERE id = $1", id)
+func (s *pgUserStore) GetOne(ctx context.Context, id int) (*User, error) {
+	var u User
+	err := s.db.GetContext(ctx, &u, "SELECT * FROM users WHERE id = $1", id)
 	if err != nil {
-		
-		return User{}, fmt.Errorf("Unable to find user with id")
+		return nil, fmt.Errorf("Unable to find user with id, error %w", err)
 	}
-	return u, nil 
+	return &u, nil
 }
 
-func (s *pgUserStore) GetOneByStudentID(ctx context.Context, studentID string) (User, error) {
-    var u User
+func (s *pgUserStore) GetOneByStudentID(ctx context.Context, studentID string) (*User, error) {
+	var u User
 
-    // Check if the length of the studentID is 8 characters
-    if len(studentID) != 8 {
-        return User{}, fmt.Errorf("studentID must be 8 digits long, got %d", len(studentID))
-    }
+	// Check if the length of the studentID is 8 characters
+	if len(studentID) != 8 {
+		return nil, fmt.Errorf("studentID must be 8 digits long, got %d", len(studentID))
+	}
 
-    // Convert string parameter to studentID integer type 
-    value, err := strconv.Atoi(studentID)
-    if err != nil {
-        return User{}, fmt.Errorf("studentID must be a valid integer")
-    }
+	// Convert string parameter to studentID integer type
+	value, err := strconv.Atoi(studentID)
+	if err != nil {
+		return nil, fmt.Errorf("studentID must be a valid integer")
+	}
 
-    err = s.db.GetContext(ctx, &u, "SELECT * FROM users WHERE student_id = $1", value)
-    if err != nil {
-        return User{}, fmt.Errorf("Unable to find user with studentID %d", value)
-    }
-    return u, nil 
+	err = s.db.GetContext(ctx, &u, "SELECT * FROM users WHERE student_id = $1", value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to find user with studentID %d, with error %w", value, err)
+	}
+	return &u, nil
 }
 
+func (s *pgUserStore) GetOneByEmail(ctx context.Context, email string) (*User, error) {
+	var u User
 
-func (s *pgUserStore) GetOneByEmail(ctx context.Context, email string) (User, error) {
-	var u User 
-	
 	err := s.db.GetContext(ctx, &u, "SELECT * FROM users WHERE TRIM(LOWER(email)) = TRIM(LOWER($1))", email)
 	if err != nil {
-		return User{}, fmt.Errorf("Unable to find user with email %s", email)
+		return nil, fmt.Errorf("Unable to find user with email %s, with error %w", email, err)
 	}
-	return u, nil
+	return &u, nil
 }
 
-func (s *pgUserStore) Create(ctx context.Context, user User) (User, error) {
-	return User{}, nil
+func (s *pgUserStore) Create(ctx context.Context, user User) (*User, error) {
+	// String StudentID conversion to ingetger 
+	value, err := strconv.Atoi(user.StudentID)
+	if err != nil {
+		return nil, fmt.Errorf("studentID must be a valid integer")
+	}
+	
+	query := "INSERT INTO users (email, name, student_id) VALUES ($1, $2, $3) RETURNING id, created_at"
+	// reassign the error value if needed 
+	err = s.db.QueryRowContext(ctx, query, user.Email, user.Name, value).Scan(&user.ID, &user.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create and store a user, error %w", err)
+
+	}
+	return &user, nil 
 }
 
-func (s *pgUserStore) Update(ctx context.Context, user User) (User, error) {
-	return User{}, nil
+func (s *pgUserStore) Update(ctx context.Context, user User) (*User, error) {
+	return nil, nil
 }
 
 func (s *pgUserStore) Delete(ctx context.Context, id int) error {
