@@ -86,7 +86,7 @@ func (s *pgUserStore) GetOneByEmail(ctx context.Context, email string) (*User, e
 }
 
 func (s *pgUserStore) Create(ctx context.Context, user User) (*User, error) {
-	// String StudentID conversion to ingetger
+	// String StudentID conversion to integer
 	value, err := strconv.Atoi(user.StudentID)
 	if err != nil {
 		return nil, fmt.Errorf("studentID must be a valid integer")
