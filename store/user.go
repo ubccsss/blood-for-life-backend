@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -111,24 +110,25 @@ func (s *pgUserStore) Update(ctx context.Context, user User) (*User, error) {
 
 	query := "UPDATE users SET email = $1, name = $2, student_id = $3 WHERE id = $4"
 
-	result, err = s.db.ExecContext(ctx, query, user.Email, user.Name, value, user.ID)
+	_, err := s.db.ExecContext(ctx, query, user.Email, user.Name, value, user.ID)
+
 	if err != nil {
 		return nil, fmt.Errorf("Unable to update user, error %w", err)
 
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return nil, fmt.Errorf("Unable to update user, error %w", err)
-	}
-
-	if rows != 1 {
-		log.Fatalf("Expected to update 1 row, affected %d", rows)
 	}
 
 	return &user, nil
 }
 
 func (s *pgUserStore) Delete(ctx context.Context, id int) error {
+	query := "DELETE FROM users WHERE id = $1"
+
+	_, err := s.db.ExecContext(ctx, query, id)
+
+	if err != nil {
+		return fmt.Errorf("Unable to delete user, error %w", err)
+
+	}
+
 	return nil
 }
