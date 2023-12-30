@@ -1,4 +1,5 @@
 package store
+
 import (
 	"context"
 	"fmt"
@@ -85,26 +86,49 @@ func (s *pgUserStore) GetOneByEmail(ctx context.Context, email string) (*User, e
 }
 
 func (s *pgUserStore) Create(ctx context.Context, user User) (*User, error) {
-	// String StudentID conversion to ingetger 
+	// String StudentID conversion to integer
 	value, err := strconv.Atoi(user.StudentID)
 	if err != nil {
 		return nil, fmt.Errorf("studentID must be a valid integer")
 	}
-	
+
 	query := "INSERT INTO users (email, name, student_id) VALUES ($1, $2, $3) RETURNING id, created_at"
-	// reassign the error value if needed 
+	// reassign the error value if needed
 	err = s.db.QueryRowContext(ctx, query, user.Email, user.Name, value).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create and store a user, error %w", err)
 
 	}
-	return &user, nil 
+	return &user, nil
 }
 
 func (s *pgUserStore) Update(ctx context.Context, user User) (*User, error) {
-	return nil, nil
+	value, err := strconv.Atoi(user.StudentID)
+	if err != nil {
+		return nil, fmt.Errorf("studentID must be a valid integer")
+	}
+
+	query := "UPDATE users SET email = $1, name = $2, student_id = $3 WHERE id = $4"
+
+	_, err = s.db.ExecContext(ctx, query, user.Email, user.Name, value, user.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to update user, error %w", err)
+
+	}
+
+	return &user, nil
 }
 
 func (s *pgUserStore) Delete(ctx context.Context, id int) error {
+	query := "DELETE FROM users WHERE id = $1"
+
+	_, err := s.db.ExecContext(ctx, query, id)
+
+	if err != nil {
+		return fmt.Errorf("Unable to delete user, error %w", err)
+
+	}
+
 	return nil
 }
