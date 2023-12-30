@@ -110,7 +110,7 @@ func (s *pgUserStore) Update(ctx context.Context, user User) (*User, error) {
 
 	query := "UPDATE users SET email = $1, name = $2, student_id = $3 WHERE id = $4"
 
-	_, err := s.db.ExecContext(ctx, query, user.Email, user.Name, value, user.ID)
+	_, err = s.db.ExecContext(ctx, query, user.Email, user.Name, value, user.ID)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to update user, error %w", err)
