@@ -84,7 +84,7 @@ func (s *pgEventStore) Create(ctx context.Context, event Event) (*Event, error) 
 func (s *pgEventStore) Update(ctx context.Context, event Event) (*Event, error) {
 	query := "UPDATE events SET name = $1, description = $2, start_date = $3, end_date = $4, volunteers_required = $5, WHERE id = $6"
 
-	_, err = s.db.ExecContext(ctx, query, event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.ID)
+	_, err := s.db.ExecContext(ctx, query, event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.ID)
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to update event, error %w", err)
