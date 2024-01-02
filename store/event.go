@@ -81,10 +81,27 @@ func (s *pgEventStore) Create(ctx context.Context, event Event) (*Event, error) 
     return &event, nil 
 }
 
-
 func (s *pgEventStore) Update(ctx context.Context, event Event) (*Event, error) {
-    return nil, nil
+	query := "UPDATE events SET name = $1, description = $2, start_date = $3, end_date = $4, volunteers_required = $5, WHERE id = $6"
+
+	_, err = s.db.ExecContext(ctx, query, event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to update event, error %w", err)
+
+	}
+
+	return &event, nil
 }
 func (s *pgEventStore) Delete(ctx context.Context, id int) error {
+    query := "DELETE FROM events WHERE id = $1"
+
+	_, err := s.db.ExecContext(ctx, query, id)
+
+	if err != nil {
+		return fmt.Errorf("unable to delete event, error %w", err)
+
+	}
+
     return nil
 }
