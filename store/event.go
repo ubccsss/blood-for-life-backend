@@ -65,7 +65,8 @@ func (s *pgEventStore) GetOneByName(ctx context.Context, name string) (*Event, e
 // Don't know if I handled date right here
 func (s *pgEventStore) GetOneByStartDate(ctx context.Context, date time.Time) (*Event, error) {
     var e Event
-    err := s.db.GetContext(ctx, &e, "SELECT * FROM events WHERE start_date = $1", date)
+    formattedDate := date.Format("2006-01-02 15:04");
+    err := s.db.GetContext(ctx, &e, "SELECT * FROM events WHERE TO_CHAR(start_date, 'YYYY-MM-DD HH24:MI') = $1", formattedDate)
     if err != nil {
         return nil, fmt.Errorf("unable to find event with start date %s, with error %w", date, err)
     }
