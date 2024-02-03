@@ -15,7 +15,7 @@ type Event struct {
 	StartDate          time.Time `db:"start_date" json:"startDate"`
 	EndDate            time.Time `db:"end_date" json:"endDate"`
 	VolunteersRequired int       `db:"volunteers_required" json:"volunteersRequired"`
-	Location           string    `db:"location" json: "location"`
+	Location           string    `db:"location" json:"location"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 }
 
