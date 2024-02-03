@@ -29,7 +29,7 @@ func bind(e *echo.Echo, eventStore store.EventStore) {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/create", func(c echo.Context) error {
+	e.POST("/api/create", func(c echo.Context) error {
 		event := new(store.Event)
 
 		// parse request body
