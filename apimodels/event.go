@@ -1,4 +1,4 @@
-package store
+package apimodels
 
 import (
 	"context"
@@ -19,12 +19,21 @@ type Event struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 }
 
+type CreateEventModel struct {
+	Name               string    `db:"name" json:"name"`
+	Description        string    `db:"description" json:"description"`
+	StartDate          time.Time `db:"start_date" json:"startDate"`
+	EndDate            time.Time `db:"end_date" json:"endDate"`
+	VolunteersRequired int       `db:"volunteers_required" json:"volunteersRequired"`
+	Location           string    `db:"location" json:"location"`
+}
+
 type EventStore interface {
 	GetAll(ctx context.Context) ([]Event, error)
 	GetOne(ctx context.Context, id int) (*Event, error)
 	GetOneByStartDate(ctx context.Context, startDate time.Time) (*Event, error)
 	GetOneByName(ctx context.Context, name string) (*Event, error) // ??
-	Create(ctx context.Context, event Event) (*Event, error)
+	Create(ctx context.Context, event CreateEventModel) (*Event, error)
 	Update(ctx context.Context, event Event) (*Event, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -75,12 +84,17 @@ func (s *pgEventStore) GetOneByStartDate(ctx context.Context, date time.Time) (*
 	return &e, nil
 }
 
-func (s *pgEventStore) Create(ctx context.Context, event Event) (*Event, error) {
+func (s *pgEventStore) Create(ctx context.Context, newEvent CreateEventModel) (*Event, error) {
+	id := 0
+	createdAt := time.Time{}
+
 	query := "INSERT INTO events (name, description, start_date, end_date, volunteers_required, location) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at"
-	err := s.db.QueryRowContext(ctx, query, event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.Location).Scan(&event.ID, &event.CreatedAt)
+	err := s.db.QueryRowContext(ctx, query, newEvent.Name, newEvent.Description, newEvent.StartDate, newEvent.EndDate, newEvent.VolunteersRequired, newEvent.Location).Scan(&id, &createdAt)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create and store an event, error %w", err)
 	}
+
+	event := Event{id, newEvent.Name, newEvent.Description, newEvent.StartDate, newEvent.EndDate, newEvent.VolunteersRequired, newEvent.Location, createdAt}
 	return &event, nil
 }
 

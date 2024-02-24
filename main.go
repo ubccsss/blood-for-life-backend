@@ -1,36 +1,70 @@
 package main
 
 import (
-	"blood-for-life-backend/store"
+	"blood-for-life-backend/apimodels"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
+	_ "github.com/lib/pq"
 )
 
 func main() {
 	e := echo.New()
 
-	db, err := sqlx.Connect() // configuration needed
+	envErr := godotenv.Load(".env")
 
-	if err != nil {
-		panic(err)
+	if envErr != nil {
+		fmt.Println(envErr.Error())
 	}
 
-	eventStore := store.NewPGEventStore(db)
+	dbConnection := os.Getenv("DB")
+
+	db, err := sqlx.Connect("postgres", dbConnection)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("Successfully Connected")
+	}
+
+	loadSchema(db)
+
+	eventStore := apimodels.NewPGEventStore(db)
 	bind(e, eventStore)
 
 	e.Logger.Fatal(e.Start(":1323"))
 
 }
 
-func bind(e *echo.Echo, eventStore store.EventStore) {
+func loadSchema(db *sqlx.DB) {
+	file, err := os.ReadFile("./db/schema.sql")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	_, err = db.Exec(string(file))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+func bind(e *echo.Echo, eventStore apimodels.EventStore) {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	e.POST("/api/create", func(c echo.Context) error {
-		event := new(store.Event)
+		event := new(apimodels.CreateEventModel)
 
 		// parse request body
 		bindErr := c.Bind(event)

@@ -2,4 +2,3 @@
 /.pgdata
 
 # Your secrets
-.env
