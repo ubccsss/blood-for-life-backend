@@ -2,6 +2,7 @@ package main
 
 import (
 	"blood-for-life-backend/apimodels"
+	"blood-for-life-backend/store"
 	"fmt"
 	"net/http"
 	"os"
@@ -39,7 +40,7 @@ func main() {
 
 	loadSchema(db)
 
-	eventStore := apimodels.NewPGEventStore(db)
+	eventStore := store.NewPGEventStore(db)
 	bind(e, eventStore)
 
 	e.Logger.Fatal(e.Start(":1323"))
@@ -58,13 +59,13 @@ func loadSchema(db *sqlx.DB) {
 	}
 }
 
-func bind(e *echo.Echo, eventStore apimodels.EventStore) {
+func bind(e *echo.Echo, eventStore store.EventStore) {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	e.POST("/api/create", func(c echo.Context) error {
-		event := new(apimodels.CreateEventModel)
+		event := new(apimodels.GetEvent)
 
 		// parse request body
 		bindErr := c.Bind(event)
@@ -73,7 +74,7 @@ func bind(e *echo.Echo, eventStore apimodels.EventStore) {
 			return c.JSON(http.StatusBadRequest, bindErr)
 		}
 
-		_, err := eventStore.Create(c.Request().Context(), *event)
+		_, err := eventStore.Create(c.Request().Context(), event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.Location)
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
