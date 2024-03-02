@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -69,12 +70,15 @@ func bind(e *echo.Echo, eventStore store.EventStore) {
 
 		// parse request body
 		bindErr := c.Bind(event)
-
 		if bindErr != nil {
 			return c.JSON(http.StatusBadRequest, bindErr)
 		}
 
-		_, err := eventStore.Create(c.Request().Context(), event.Name, event.Description, event.StartDate, event.EndDate, event.VolunteersRequired, event.Location)
+		// convert string to time.Time
+		start, _ := time.Parse("01/02/2006 03:04 PM", event.StartDate)
+		end, _ := time.Parse("01/02/2006 03:04 PM", event.EndDate)
+
+		_, err := eventStore.Create(c.Request().Context(), event.Name, event.Description, start, end, event.VolunteersRequired, event.Location)
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
