@@ -66,7 +66,7 @@ func bind(e *echo.Echo, eventStore store.EventStore) {
 	})
 
 	e.POST("/api/create", func(c echo.Context) error {
-		event := new(apimodels.GetEvent)
+		event := new(apimodels.CreateEvent)
 
 		// parse request body
 		bindErr := c.Bind(event)

@@ -1,6 +1,6 @@
 package apimodels
 
-type GetEvent struct {
+type CreateEvent struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
 	StartDate          string `json:"startDate"`
