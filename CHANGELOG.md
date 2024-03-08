@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/ubccsss/Blood-For-Life-Management-Backend/compare/v1.0.0...v1.1.0) (2024-03-08)
+
+
+### Features
+
+* add basic docker setup and CI ([375a63f](https://github.com/ubccsss/Blood-For-Life-Management-Backend/commit/375a63fd9026918d3e2be72637d601a7d154e70e))
+
+
+### Bug Fixes
+
+* add caching and improve workflow ([8ceac8d](https://github.com/ubccsss/Blood-For-Life-Management-Backend/commit/8ceac8d656463379c0c99a5329f47edad7387cea))
+* invalid syntax ([40fbc6b](https://github.com/ubccsss/Blood-For-Life-Management-Backend/commit/40fbc6b4acfb643b9b49f8711024a298c05b1995))
+
 ## 1.0.0 (2024-02-16)
 
 
