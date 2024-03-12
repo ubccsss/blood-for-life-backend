@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/ubccsss/blood-for-life-backend/compare/v1.1.0...v1.2.0) (2024-03-12)
+
+
+### Features
+
+* create event api ([#8](https://github.com/ubccsss/blood-for-life-backend/issues/8)) ([c450524](https://github.com/ubccsss/blood-for-life-backend/commit/c450524a2dd26c799e021265fbdc5b34dfc3223f))
+
 ## [1.1.0](https://github.com/ubccsss/Blood-For-Life-Management-Backend/compare/v1.0.0...v1.1.0) (2024-03-08)
 
 
