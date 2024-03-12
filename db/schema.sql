@@ -3,10 +3,11 @@ CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    location TEXT,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
     volunteers_required INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 --- Users
