@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -27,6 +28,7 @@ type EventStore interface {
 	Create(ctx context.Context, name string, description string, start time.Time, end time.Time, volunteers int, location string) (*Event, error)
 	Update(ctx context.Context, event Event) (*Event, error)
 	Delete(ctx context.Context, id int) error
+	UnregisterEvent(ctx context.Context, UserID int, EventID int) error
 }
 
 type pgEventStore struct {
@@ -111,5 +113,32 @@ func (s *pgEventStore) Delete(ctx context.Context, id int) error {
 
 	}
 
+	return nil
+}
+
+
+// unregisters a user from an event 
+func (s *pgEventStore) UnregisterEvent(ctx context.Context, userID int, eventID int) error {
+
+	//returning id of the signUp from event_signups
+	signUpQuery := `DELETE FROM event_signups WHERE user_id = $1 AND event_id = $2 RETURNING id`
+	var signUpID int
+	err := s.db.GetContext(ctx, &signUpID, signUpQuery, userID, eventID)
+
+    if err != nil && err != sql.ErrNoRows {
+        // Handle errors NOT corresponding to a 'no rows' return error 
+        return fmt.Errorf("failed to remove user from event signup list: %w", err)
+    }
+
+	//returning id of the signUp from event_standby 
+	if err == sql.ErrNoRows {
+		var standByID int 
+		standByQuery := `DELETE FROM event_standbys WHERE user_id = $1 AND event_id = $2 RETURNING id`
+		err := s.db.GetContext(ctx, &standByID, standByQuery, userID, eventID)
+
+		if err != nil {
+			return fmt.Errorf("failed to remove user from event standby list: %w", err)
+		}
+	}
 	return nil
 }
