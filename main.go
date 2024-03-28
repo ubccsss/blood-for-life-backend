@@ -86,4 +86,20 @@ func bind(e *echo.Echo, eventStore store.EventStore) {
 
 		return c.JSON(http.StatusOK, event)
 	})
+
+	e.POST("/api/unregister", func(c echo.Context) error {
+		var request apimodels.UnregisterEvent
+
+		// parse request body
+		bindErr := c.Bind(&request)
+		if bindErr != nil {
+			return c.JSON(http.StatusBadRequest, bindErr)
+		}
+
+		err := eventStore.UnregisterEvent(c.Request().Context(), request.UserID, request.EventID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+		return c.JSON(http.StatusOK, request.UserID) //return userID that was removed if successful
+	})
 }
